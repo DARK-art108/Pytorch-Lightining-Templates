@@ -23,6 +23,13 @@ class CIFAR10DataModule(pl.LightningDataModule):
         CIFAR10(self.data_dir, train=True, download=True)
         CIFAR10(self.data_dir, train=False, download=True)
 
+    def setup(self, stage=None):
+        if stage == 'fit' or stage is None:
+            cifar_full = CIFAR10(self.data_dir, train=True, transform=self.transform)
+            self.cifar_train, self.cifar_val = random_split(cifar_full, [45000, 5000])
+        # Assign test dataset for use in dataloader(s)
+        if stage == 'test' or stage is None:
+            self.cifar_test = CIFAR10(self.data_dir, train=False, transform=self.transform)
 
 class LitModule(pl.LightningModule):
     def __init__(self, input_shape, num_classes, learning_rate=2e-4):
